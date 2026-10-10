@@ -60,7 +60,7 @@ Die Beschriftung der Blätter-Buttons nennt das Ziel (z. B. `‹ § 1 AsylG`), d
 
 ### Darstellung
 
-Die Blätter-Buttons sind farbig gefüllt, der Button „Inhaltsverzeichnis“ in der Mitte ist umrandet. Auf schmalen Bildschirmen (bis 600 px) steht „Inhaltsverzeichnis“ in einer eigenen Zeile über den beiden Blätter-Buttons. Fehlen Vorgänger und Nachfolger, bleibt „Inhaltsverzeichnis“ mittig.
+Die Buttons sind in den Grautönen des Templates gehalten: die Blätter-Buttons hellgrau, „Inhaltsverzeichnis“ in der Mitte weiß. Auf schmalen Bildschirmen (bis 600 px) steht „Inhaltsverzeichnis“ in einer eigenen Zeile über den beiden Blätter-Buttons. Fehlen Vorgänger und Nachfolger, bleibt „Inhaltsverzeichnis“ mittig.
 
 ### Sprache der Beschriftung
 
