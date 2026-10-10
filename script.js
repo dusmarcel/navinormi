@@ -22,9 +22,13 @@
             return;
         }
 
-        if (/^[0-9]$/.test(event.key)) {
+        var jumpStart = /^[0-9]$/.test(event.key) ? event.key
+            : event.key === '§' ? '§ '
+            : event.key === 'a' || event.key === 'A' ? 'Art. '
+            : null;
+        if (jumpStart !== null) {
             event.preventDefault();
-            openJump(event.key);
+            openJump(jumpStart);
             return;
         }
 
@@ -90,9 +94,18 @@
      * (for prefix matches only within the same number).
      */
     function search(query) {
+        // "§" only finds paragraphs, "Art."/"Artikel" only articles
+        var kind = null;
         var words = normalize(query).trim().split(' ').filter(function (word) {
-            return word !== '' && word !== 'art' && word !== 'artikel';
+            if (word === 'art' || word === 'artikel') {
+                kind = 'Art.';
+                return false;
+            }
+            return word !== '';
         });
+        if (query.indexOf('§') !== -1) {
+            kind = kind === null ? '§' : null;
+        }
         var number = null;
         var texts = [];
         words.forEach(function (word) {
@@ -105,6 +118,9 @@
 
         var results = [];
         index.entries.forEach(function (entry) {
+            if (kind !== null && entry.l.indexOf(kind) !== 0) {
+                return;
+            }
             var numberGroup = 2;
             if (number !== null) {
                 if (entry.a === number) {
