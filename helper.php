@@ -139,9 +139,13 @@ class helper_plugin_navinormi extends Plugin
         return $html . '</nav>';
     }
 
+    /** Keyboard shortcuts handled in script.js */
+    const SHORTCUTS = ['prev' => '-', 'toc' => 'i', 'next' => '+'];
+
     private function button(string $id, string $type, string $text, string $title): string
     {
         $rel = $type === 'toc' ? '' : ' rel="' . $type . '"';
+        $title .= ' ' . sprintf($this->label('key'), self::SHORTCUTS[$type]);
         return '<a href="' . wl($id) . '" class="navinormi_' . $type . '"' . $rel
             . ' title="' . hsc($title) . '">' . hsc($text) . '</a>';
     }

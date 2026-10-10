@@ -48,6 +48,16 @@ Vorgänger und Nachfolger werden aus dem Inhaltsverzeichnis auf der Startseite d
 
 Die Beschriftung der Blätter-Buttons nennt das Ziel (z. B. `‹ § 1 AsylG`), der Tooltip zusätzlich die vollständige Zeile aus dem Inhaltsverzeichnis.
 
+### Tastenkürzel
+
+| Taste | Wirkung |
+|---|---|
+| `+` | Vorwärtsblättern |
+| `-` | Zurückblättern |
+| `i` | Inhaltsverzeichnis |
+
+`+` und `-` funktionieren auch auf dem Ziffernblock. Die Kürzel sind abgeschaltet, solange in ein Eingabefeld (z. B. die Suche) oder den Editor getippt wird, und greifen nicht zusammen mit Strg, Alt oder Cmd (Strg + `+` zoomt also weiterhin). Der Tooltip jedes Buttons nennt die zugehörige Taste.
+
 ### Darstellung
 
 Die Blätter-Buttons sind farbig gefüllt, der Button „Inhaltsverzeichnis“ in der Mitte ist umrandet. Auf schmalen Bildschirmen (bis 600 px) steht „Inhaltsverzeichnis“ in einer eigenen Zeile über den beiden Blätter-Buttons. Fehlen Vorgänger und Nachfolger, bleibt „Inhaltsverzeichnis“ mittig.
@@ -70,6 +80,7 @@ In der Druckansicht wird die Leiste ausgeblendet.
 |---|---|
 | `action.php` | Blendet die Leiste über das Event `TPL_ACT_RENDER` vor und nach dem Seiteninhalt ein |
 | `helper.php` | Erkennung der Norm, Auswertung des Inhaltsverzeichnisses, HTML der Leiste |
+| `script.js` | Tastenkürzel |
 | `style.css` / `print.css` | Gestaltung bzw. Ausblenden beim Druck |
 | `lang/de`, `lang/en` | Beschriftungen und Text der Einstellung |
 | `conf/` | Einstellung `lang` (Sprache der Beschriftung) |
