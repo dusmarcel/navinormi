@@ -106,20 +106,35 @@ class helper_plugin_navinormi extends Plugin
         ];
     }
 
+    /** @var array|null button labels in the configured language */
+    private $labels = null;
+
+    /** Button label in the language set in the plugin config (not the wiki's interface language) */
+    private function label(string $key): string
+    {
+        if ($this->labels === null) {
+            $language = in_array($this->getConf('lang'), ['de', 'en'], true) ? $this->getConf('lang') : 'de';
+            $lang = [];
+            include __DIR__ . '/lang/' . $language . '/lang.php';
+            $this->labels = $lang;
+        }
+        return $this->labels[$key] ?? '';
+    }
+
     /** HTML of the navigation bar */
     public function renderNavigation(array $nav, string $position): string
     {
         $html = '<nav class="plugin_navinormi plugin_navinormi_' . $position . '"'
-            . ' aria-label="' . hsc($this->getLang('aria')) . '">';
+            . ' aria-label="' . hsc($this->label('aria')) . '">';
 
         // empty placeholders keep the TOC button centred if a neighbour is missing
         $html .= $nav['prev'] === null ? '<span></span>'
             : $this->button($nav['prev']['id'], 'prev', '‹ ' . $nav['prev']['label'],
-                sprintf($this->getLang('prev'), $nav['prev']['title']));
-        $html .= $this->button($nav['toc'], 'toc', $this->getLang('toc'), $this->getLang('toc'));
+                sprintf($this->label('prev'), $nav['prev']['title']));
+        $html .= $this->button($nav['toc'], 'toc', $this->label('toc'), $this->label('toc'));
         $html .= $nav['next'] === null ? '<span></span>'
             : $this->button($nav['next']['id'], 'next', $nav['next']['label'] . ' ›',
-                sprintf($this->getLang('next'), $nav['next']['title']));
+                sprintf($this->label('next'), $nav['next']['title']));
 
         return $html . '</nav>';
     }

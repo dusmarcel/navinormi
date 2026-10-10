@@ -1,38 +1,94 @@
-.plugin_navinormi {
+/* nav.plugin_navinormi inside .dokuwiki: specific enough to beat the template's ".dokuwiki a:link" rules */
+
+.dokuwiki nav.plugin_navinormi {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
-    gap: .5em;
-    margin: 0 0 1.4em;
+    gap: 1em;
+    clear: both;
+    margin: 1em 0 2em;
 }
 
-.plugin_navinormi_bottom {
-    margin: 1.4em 0 0;
+.dokuwiki nav.plugin_navinormi_bottom {
+    margin: 2.5em 0 1em;
 }
 
-.plugin_navinormi a {
+.dokuwiki nav.plugin_navinormi a,
+.dokuwiki nav.plugin_navinormi a:link,
+.dokuwiki nav.plugin_navinormi a:visited {
+    display: block;
     min-width: 0;
-    padding: .4em .8em;
-    border: 1px solid __border__;
-    border-radius: 4px;
-    background-color: __background_alt__;
-    color: __link__;
+    padding: .75em 1.25em;
+    border: 1px solid __link__;
+    border-radius: 6px;
+    background-color: __link__;
+    color: __background__;
+    font-size: 1.1em;
+    font-weight: bold;
+    line-height: 1.3;
     text-align: center;
     text-decoration: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    transition: filter .15s, box-shadow .15s;
 }
 
-.plugin_navinormi a:hover,
-.plugin_navinormi a:focus {
-    background-color: __background_neu__;
+.dokuwiki nav.plugin_navinormi a:hover,
+.dokuwiki nav.plugin_navinormi a:focus,
+.dokuwiki nav.plugin_navinormi a:active {
+    color: __background__;
     text-decoration: none;
+    filter: brightness(1.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
 }
 
-.plugin_navinormi a.navinormi_prev {
+/* the table of contents button is the secondary action: outlined instead of filled */
+.dokuwiki nav.plugin_navinormi a.navinormi_toc,
+.dokuwiki nav.plugin_navinormi a.navinormi_toc:link,
+.dokuwiki nav.plugin_navinormi a.navinormi_toc:visited,
+.dokuwiki nav.plugin_navinormi a.navinormi_toc:hover,
+.dokuwiki nav.plugin_navinormi a.navinormi_toc:focus {
+    background-color: __background__;
+    color: __link__;
+}
+
+.dokuwiki nav.plugin_navinormi a.navinormi_prev {
     text-align: left;
 }
 
-.plugin_navinormi a.navinormi_next {
+.dokuwiki nav.plugin_navinormi a.navinormi_next {
     text-align: right;
+}
+
+/* DokuWiki wraps this file in "@media screen", so no media type here */
+@media (max-width: 600px) {
+    /* table of contents on its own row above prev/next, so the targets are not truncated */
+    .dokuwiki nav.plugin_navinormi {
+        grid-template-columns: 1fr 1fr;
+        gap: .5em;
+    }
+
+    /* no "a / b" shorthands: DokuWiki's LESS compiler evaluates them as divisions */
+    .dokuwiki nav.plugin_navinormi > :nth-child(1) {
+        grid-row: 2;
+        grid-column: 1;
+    }
+
+    .dokuwiki nav.plugin_navinormi > :nth-child(2) {
+        grid-row: 1;
+        grid-column: span 2;
+    }
+
+    .dokuwiki nav.plugin_navinormi > :nth-child(3) {
+        grid-row: 2;
+        grid-column: 2;
+    }
+
+    .dokuwiki nav.plugin_navinormi a,
+    .dokuwiki nav.plugin_navinormi a:link,
+    .dokuwiki nav.plugin_navinormi a:visited {
+        padding: .6em .7em;
+        font-size: 1em;
+    }
 }
