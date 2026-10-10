@@ -43,6 +43,106 @@ class helper_plugin_navinormi extends Plugin
         return ['toc' => $tocId, 'prev' => $prev, 'next' => $next];
     }
 
+    /**
+     * Regulation a page belongs to: a norm page ("art._2_asylgesetz") or a start page ("asylgesetz")
+     *
+     * @return string|null regulation slug as used in normi
+     */
+    public function getRegulation(string $id): ?string
+    {
+        if (plugin_load('syntax', 'normi') === null) {
+            return null;
+        }
+        if (preg_match('/^art\._[0-9]+[a-z]?_(.+)$/', $id, $m)) {
+            return $this->findSlug($m[1]);
+        }
+        foreach (syntax_plugin_normi::START_PAGES as $slug => $page) {
+            if (cleanID($page) === $id) {
+                return $slug;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Index of all provisions of all regulations, for the quick jump dialog.
+     *
+     * Regulations are ordered national laws first (in normi's order), then the others.
+     * The index is cached until a start page (or normi/navinormi) changes; provisions
+     * of regulations the current user may not read are left out.
+     *
+     * @return array ['regs' => [['slug', 'syn' => synonyms]], 'entries' => [['r' => reg index,
+     *               'a' => article, 'l' => "§ 5 AufenthG", 'h' => heading, 'u' => URL]]]
+     */
+    public function getIndex(): array
+    {
+        if (plugin_load('syntax', 'normi') === null) {
+            return ['regs' => [], 'entries' => []];
+        }
+
+        $slugs = array_values(array_unique(array_merge(
+            array_intersect(syntax_plugin_normi::NATIONAL_LAW_SLUGS, array_keys(syntax_plugin_normi::START_PAGES)),
+            array_keys(syntax_plugin_normi::START_PAGES)
+        )));
+
+        $files = [__FILE__, DOKU_PLUGIN . 'normi/syntax.php'];
+        foreach ($slugs as $slug) {
+            $files[] = wikiFN(cleanID(syntax_plugin_normi::START_PAGES[$slug]));
+        }
+        $cache = new \dokuwiki\Cache\Cache('navinormi_index', '.json');
+        // "age" also picks up start pages created after the cache was built
+        if ($cache->useCache(['files' => $files, 'age' => 3600])) {
+            $index = json_decode($cache->retrieveCache(), true);
+        } else {
+            $index = $this->buildIndex($slugs);
+            $cache->storeCache(json_encode($index));
+        }
+
+        $readable = [];
+        foreach ($index['regs'] as $r => $reg) {
+            $readable[$r] = auth_quickaclcheck($reg['toc']) >= AUTH_READ;
+        }
+        $index['entries'] = array_values(array_filter($index['entries'], fn($e) => $readable[$e['r']]));
+        return $index;
+    }
+
+    private function buildIndex(array $slugs): array
+    {
+        $index = ['regs' => [], 'entries' => []];
+        foreach ($slugs as $slug) {
+            $tocId = cleanID(syntax_plugin_normi::START_PAGES[$slug]);
+            if (!page_exists($tocId)) {
+                continue;
+            }
+            $r = count($index['regs']);
+            $index['regs'][] = [
+                'slug' => $slug,
+                'toc' => $tocId,
+                'syn' => array_values(array_filter(syntax_plugin_normi::REGULATIONS[$slug], fn($s) => $s !== '')),
+            ];
+            foreach ($this->parseToc(rawWiki($tocId), syntax_plugin_normi::REGULATIONS[$slug], $slug) as $entry) {
+                $index['entries'][] = [
+                    'r' => $r,
+                    'a' => $entry['article'],
+                    'l' => $entry['label'],
+                    'h' => trim(substr($entry['title'], strlen($entry['label'])), " \t:"),
+                    'u' => wl($entry['id']),
+                ];
+            }
+        }
+        return $index;
+    }
+
+    /** Labels for script.js, in the language set in the plugin config */
+    public function getJsLabels(): array
+    {
+        $labels = [];
+        foreach (['jump_aria', 'jump_placeholder', 'jump_loading', 'jump_empty', 'jump_hint'] as $key) {
+            $labels[substr($key, 5)] = $this->label($key);
+        }
+        return $labels;
+    }
+
     /** Regulation slug whose cleaned form matches the slug part of a page ID */
     private function findSlug(string $idSlug): ?string
     {

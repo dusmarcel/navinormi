@@ -56,7 +56,29 @@ Die Beschriftung der Blätter-Buttons nennt das Ziel (z. B. `‹ § 1 AsylG`), d
 | `-` | Zurückblättern |
 | `i` | Inhaltsverzeichnis |
 
+| `0`–`9` | Norm direkt aufrufen (siehe unten) |
+
 `+` und `-` funktionieren auch auf dem Ziffernblock. Die Kürzel sind abgeschaltet, solange in ein Eingabefeld (z. B. die Suche) oder den Editor getippt wird, und greifen nicht zusammen mit Strg, Alt oder Cmd (Strg + `+` zoomt also weiterhin). Der Tooltip jedes Buttons nennt die zugehörige Taste.
+
+### Norm direkt aufrufen
+
+Wird eine Ziffer getippt, öffnet sich ein Eingabefenster mit Vorschlägen aus allen Rechtsakten, die normi kennt. Mit jeder weiteren Eingabe wird die Auswahl konkreter; **Enter** öffnet den markierten Vorschlag, **↑/↓** wählen aus, **Esc** schließt das Fenster. Ein Mausklick auf einen Vorschlag öffnet ihn ebenfalls.
+
+| Eingabe | Vorschläge (Auszug) |
+|---|---|
+| `5` | § 5 AufenthG, § 5 AsylG, … Art. 5 Rückführungsrichtlinie, § 5a FreizügG/EU, § 50 AufenthG, § 50 AsylG, Art. 50 AMM-VO, … |
+| `50` | § 50 AufenthG, § 50 AsylG, Art. 50 Asylverfahrensverordnung, … |
+| `50 amm` | Art. 50 Asyl- und Migrationsmanagement-Verordnung |
+| `5 asylg` | § 5 AsylG, § 50 AsylG, § 51 AsylG, … |
+| `5` ⌫ `ausreise` | Normen mit „Ausreise…“ in der Überschrift, z. B. § 50 AufenthG |
+
+Reihenfolge:
+
+1. Normen mit genau der eingegebenen Nummer, zuerst aus dem Rechtsakt der aktuellen Seite, dann die nationalen Gesetze, dann die EU-Rechtsakte.
+2. Normen, deren Nummer mit der Eingabe beginnt, nach Nummer sortiert (§ 5a, § 50, § 51, …).
+3. Zusätzlicher Text grenzt die Auswahl ein: Er muss am Wortanfang der Normbezeichnung (alle normi-Synonyme, z. B. `qvo`, `amm`) oder der Überschrift aus dem Inhaltsverzeichnis stehen. Treffer in der Normbezeichnung stehen vor Treffern nur in der Überschrift. `§`, `Art.` und `Artikel` dürfen mit eingegeben werden.
+
+Der Index aller Normen wird beim ersten Öffnen des Fensters über `lib/exe/ajax.php?call=plugin_navinormi` geladen. Auf dem Server wird er zwischengespeichert, bis sich eine Startseite ändert (neu angelegte Startseiten erscheinen spätestens nach einer Stunde). Normen, deren Startseite der Benutzer nicht lesen darf, sind nicht enthalten.
 
 ### Darstellung
 
@@ -78,9 +100,9 @@ In der Druckansicht wird die Leiste ausgeblendet.
 
 | Datei | Inhalt |
 |---|---|
-| `action.php` | Blendet die Leiste über das Event `TPL_ACT_RENDER` vor und nach dem Seiteninhalt ein |
-| `helper.php` | Erkennung der Norm, Auswertung des Inhaltsverzeichnisses, HTML der Leiste |
-| `script.js` | Tastenkürzel |
+| `action.php` | Blendet die Leiste über das Event `TPL_ACT_RENDER` vor und nach dem Seiteninhalt ein; liefert den Normen-Index (AJAX) und die Texte für `script.js` (`JSINFO`) |
+| `helper.php` | Erkennung der Norm, Auswertung des Inhaltsverzeichnisses, Normen-Index, HTML der Leiste |
+| `script.js` | Tastenkürzel und Fenster „Norm direkt aufrufen“ |
 | `style.css` / `print.css` | Gestaltung bzw. Ausblenden beim Druck |
 | `lang/de`, `lang/en` | Beschriftungen und Text der Einstellung |
 | `conf/` | Einstellung `lang` (Sprache der Beschriftung) |

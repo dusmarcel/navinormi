@@ -24,6 +24,32 @@ class action_plugin_navinormi extends ActionPlugin
     {
         $controller->register_hook('TPL_ACT_RENDER', 'BEFORE', $this, 'handleRender', 'top');
         $controller->register_hook('TPL_ACT_RENDER', 'AFTER', $this, 'handleRender', 'bottom');
+        $controller->register_hook('DOKUWIKI_STARTED', 'AFTER', $this, 'handleJsinfo');
+        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handleAjax');
+    }
+
+    /** Current regulation and labels for the quick jump dialog in script.js */
+    public function handleJsinfo(Event $event)
+    {
+        global $JSINFO, $ID;
+        $helper = plugin_load('helper', 'navinormi');
+        $JSINFO['navinormi'] = [
+            'reg' => $helper->getRegulation((string) $ID),
+            'lang' => $helper->getJsLabels(),
+        ];
+    }
+
+    /** lib/exe/ajax.php?call=plugin_navinormi: index of all provisions as JSON */
+    public function handleAjax(Event $event)
+    {
+        if ($event->data !== 'plugin_navinormi') {
+            return;
+        }
+        $event->preventDefault();
+        $event->stopPropagation();
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(plugin_load('helper', 'navinormi')->getIndex(), JSON_UNESCAPED_UNICODE);
     }
 
     public function handleRender(Event $event, string $position)
