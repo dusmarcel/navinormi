@@ -1,0 +1,7 @@
+base   navinormi
+author Marcel Keienborg
+email  marcel@aufentha.lt
+date   2026-10-10
+name   navinormi plugin
+desc   Previous/next/table-of-contents navigation between the pages of a legal provision (requires the normi plugin)
+url    https://www.dokuwiki.org/plugin:navinormi

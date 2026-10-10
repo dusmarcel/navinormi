@@ -1,0 +1,38 @@
+.plugin_navinormi {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: .5em;
+    margin: 0 0 1.4em;
+}
+
+.plugin_navinormi_bottom {
+    margin: 1.4em 0 0;
+}
+
+.plugin_navinormi a {
+    min-width: 0;
+    padding: .4em .8em;
+    border: 1px solid __border__;
+    border-radius: 4px;
+    background-color: __background_alt__;
+    color: __link__;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.plugin_navinormi a:hover,
+.plugin_navinormi a:focus {
+    background-color: __background_neu__;
+    text-decoration: none;
+}
+
+.plugin_navinormi a.navinormi_prev {
+    text-align: left;
+}
+
+.plugin_navinormi a.navinormi_next {
+    text-align: right;
+}
