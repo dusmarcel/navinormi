@@ -5,6 +5,7 @@
  *   -    previous provision
  *   i    table of contents
  *   Backspace, b, r, z  back to the regular wiki page visited before
+ *   v, f  forward again after going back
  *   0-9  open the quick jump dialog ("5 AufenthG" + Enter opens § 5 AufenthG)
  *
  * Letters work regardless of case.
@@ -35,45 +36,115 @@
         return action === 'show' && !params.has('rev') && !params.has('at');
     }
 
-    /** regular pages visited in this tab, most recent last */
+    /**
+     * regular pages visited in this tab, oldest first, and the position of
+     * the current one; pages after it are reachable by going forward
+     */
     function readHistory() {
+        var stored = null;
         try {
-            var pages = JSON.parse(sessionStorage.getItem(HISTORY_KEY));
-            return Array.isArray(pages) ? pages : [];
+            stored = JSON.parse(sessionStorage.getItem(HISTORY_KEY));
         } catch (error) {
-            return [];
+            // unreadable: start over
         }
+        if (Array.isArray(stored)) {
+            // earlier format: plain list, current page last
+            return {pages: stored, pos: stored.length - 1};
+        }
+        if (stored && Array.isArray(stored.pages) && typeof stored.pos === 'number') {
+            return stored;
+        }
+        return {pages: [], pos: -1};
     }
 
-    function writeHistory(pages) {
+    function writeHistory(history) {
+        var excess = Math.max(0, history.pages.length - HISTORY_MAX);
         try {
-            sessionStorage.setItem(HISTORY_KEY, JSON.stringify(pages.slice(-HISTORY_MAX)));
+            sessionStorage.setItem(HISTORY_KEY, JSON.stringify({
+                pages: history.pages.slice(excess),
+                pos: Math.max(-1, history.pos - excess)
+            }));
         } catch (error) {
-            // no storage (private mode): going back stays unavailable
+            // no storage (private mode): going back and forward stays unavailable
         }
     }
 
-    // reloads and pages reached by going back are already on top
-    if (isRegularWikiPage()) {
-        var visited = readHistory();
-        if (visited[visited.length - 1] !== here) {
-            visited.push(here);
-            writeHistory(visited);
+    /** index of the entry for here nearest to the current position, -1 if none */
+    function findNearest(history) {
+        for (var distance = 0; distance < history.pages.length; distance++) {
+            if (history.pages[history.pos - distance] === here) {
+                return history.pos - distance;
+            }
+            if (history.pages[history.pos + distance] === here) {
+                return history.pos + distance;
+            }
         }
+        return -1;
     }
 
-    /** go to the regular page visited before this one; false if there is none */
-    function goBack() {
-        var pages = readHistory();
-        while (pages.length && pages[pages.length - 1] === here) {
-            pages.pop();
+    /** true if the page was reached with the browser's back or forward button */
+    function isHistoryTraversal() {
+        var entries = window.performance && performance.getEntriesByType
+            ? performance.getEntriesByType('navigation') : [];
+        return entries.length > 0 && entries[0].type === 'back_forward';
+    }
+
+    /**
+     * Record the current page. Reloads and pages reached with the back and
+     * forward shortcuts are already at the current position. The browser's
+     * back and forward buttons move the position to the page they show, so
+     * the shortcuts and the buttons agree on what "before" and "after" mean.
+     * Any other new page drops the pages after the current one, as in the
+     * browser.
+     */
+    function recordVisit(traversal) {
+        if (!isRegularWikiPage()) {
+            return;
         }
-        if (!pages.length) {
+        var history = readHistory();
+        if (history.pages[history.pos] === here) {
+            return;
+        }
+        var index = traversal ? findNearest(history) : -1;
+        if (index !== -1) {
+            history.pos = index;
+        } else {
+            history.pages = history.pages.slice(0, history.pos + 1);
+            history.pages.push(here);
+            history.pos = history.pages.length - 1;
+        }
+        writeHistory(history);
+    }
+
+    recordVisit(isHistoryTraversal());
+
+    // pages restored from the back/forward cache do not run this script again
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            recordVisit(true);
+        }
+    });
+
+    /**
+     * go to the regular page visited before (step -1) or after (step 1) this
+     * one; false if there is none
+     */
+    function goTo(step) {
+        var history = readHistory();
+        var target = history.pos + step;
+        // on an edit, diff, … page, going back returns to the page it belongs to
+        if (step < 0 && history.pages[history.pos] !== here) {
+            target = history.pos;
+        }
+        if (target < 0 || target >= history.pages.length) {
             return false;
         }
-        // the target stays on top, so it is not recorded twice on arrival
-        writeHistory(pages);
-        window.location.href = pages[pages.length - 1];
+        // the target becomes the current position, so it is not recorded again
+        // on arrival; replace() keeps the browser's history from growing with
+        // every step
+        history.pos = target;
+        writeHistory(history);
+        window.location.replace(history.pages[target]);
         return true;
     }
 
@@ -86,7 +157,13 @@
 
         var key = event.key.toLowerCase();
         if (key === 'backspace' || key === 'b' || key === 'r' || key === 'z') {
-            if (goBack()) {
+            if (goTo(-1)) {
+                event.preventDefault();
+            }
+            return;
+        }
+        if (key === 'v' || key === 'f') {
+            if (goTo(1)) {
                 event.preventDefault();
             }
             return;

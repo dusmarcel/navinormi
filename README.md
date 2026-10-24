@@ -56,13 +56,16 @@ Die Beschriftung der Blätter-Buttons nennt das Ziel (z. B. `‹ § 1 AsylG`), d
 | `-` | Zurückblättern |
 | `i` | Inhaltsverzeichnis |
 | `Backspace`, `b`, `r`, `z` | Zurück zur zuletzt aufgerufenen Wiki-Seite |
+| `v`, `f` | Nach dem Zurückgehen wieder vorwärts |
 | `0`–`9` | Norm direkt aufrufen (siehe unten) |
 | `§` | Norm direkt aufrufen, nur Paragraphen (nationale Gesetze) |
 | `a` | Norm direkt aufrufen, nur Artikel (EU-Recht, AEUV) |
 
 Groß- und Kleinschreibung spielen keine Rolle (`I` = `i`, `A` = `a`, `B` = `b` usw.). `+` und `-` funktionieren auch auf dem Ziffernblock.
 
-`Backspace`, `b`, `r` und `z` funktionieren auf allen Seiten des Wikis, nicht nur auf Normen. Gemerkt werden dabei nur reguläre Wiki-Seiten; Bearbeiten, Versionsvergleich, ältere Versionen, Suche, Administration usw. werden übersprungen und sind weiterhin nur über die Bedienelemente von DokuWiki erreichbar. Wer also eine Seite bearbeitet und speichert, gelangt mit `b` zur zuvor gelesenen Seite, nicht zurück in den Editor. Mehrfaches Drücken führt Schritt für Schritt weiter zurück. Der Verlauf gilt je Browser-Tab (`sessionStorage`, höchstens 50 Seiten).
+`Backspace`, `b`, `r` und `z` (zurück) sowie `v` und `f` (vorwärts) funktionieren auf allen Seiten des Wikis, nicht nur auf Normen. Gemerkt werden dabei nur reguläre Wiki-Seiten; Bearbeiten, Versionsvergleich, ältere Versionen, Suche, Administration usw. werden übersprungen und sind weiterhin nur über die Bedienelemente von DokuWiki erreichbar. Wer also eine Seite bearbeitet und speichert, gelangt mit `b` zur zuvor gelesenen Seite, nicht zurück in den Editor. Mehrfaches Drücken führt Schritt für Schritt weiter zurück, `v` bzw. `f` Schritt für Schritt wieder vorwärts. Wie im Browser verfällt der Weg nach vorn, sobald nach dem Zurückgehen eine neue Seite aufgerufen wird. Der Verlauf gilt je Browser-Tab (`sessionStorage`, höchstens 50 Seiten).
+
+Der Verlauf ist unabhängig vom Verlauf des Browsers, beide vertragen sich aber: Ein Schritt mit `b` oder `v` ersetzt den aktuellen Eintrag im Browser-Verlauf, statt einen neuen anzuhängen. Wer mit dem Zurück- oder Vorwärts-Button des Browsers zu einer bereits gemerkten Seite wechselt, setzt auch die Position im eigenen Verlauf auf diese Seite; ein anschließendes `b` führt also zur Seite davor, ein `v` zur Seite danach.
 
 Die Kürzel sind abgeschaltet, solange in ein Eingabefeld (z. B. die Suche) oder den Editor getippt wird, und greifen nicht zusammen mit Strg, Alt oder Cmd (Strg + `+` zoomt also weiterhin). Der Tooltip jedes Buttons nennt die zugehörige Taste.
 
