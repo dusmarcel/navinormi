@@ -55,12 +55,16 @@ Die Beschriftung der Blätter-Buttons nennt das Ziel (z. B. `‹ § 1 AsylG`), d
 | `+` | Vorwärtsblättern |
 | `-` | Zurückblättern |
 | `i` | Inhaltsverzeichnis |
-
+| `Backspace`, `b`, `r`, `z` | Zurück zur zuletzt aufgerufenen Wiki-Seite |
 | `0`–`9` | Norm direkt aufrufen (siehe unten) |
 | `§` | Norm direkt aufrufen, nur Paragraphen (nationale Gesetze) |
-| `a` / `A` | Norm direkt aufrufen, nur Artikel (EU-Recht, AEUV) |
+| `a` | Norm direkt aufrufen, nur Artikel (EU-Recht, AEUV) |
 
-`+` und `-` funktionieren auch auf dem Ziffernblock. Die Kürzel sind abgeschaltet, solange in ein Eingabefeld (z. B. die Suche) oder den Editor getippt wird, und greifen nicht zusammen mit Strg, Alt oder Cmd (Strg + `+` zoomt also weiterhin). Der Tooltip jedes Buttons nennt die zugehörige Taste.
+Groß- und Kleinschreibung spielen keine Rolle (`I` = `i`, `A` = `a`, `B` = `b` usw.). `+` und `-` funktionieren auch auf dem Ziffernblock.
+
+`Backspace`, `b`, `r` und `z` funktionieren auf allen Seiten des Wikis, nicht nur auf Normen. Gemerkt werden dabei nur reguläre Wiki-Seiten; Bearbeiten, Versionsvergleich, ältere Versionen, Suche, Administration usw. werden übersprungen und sind weiterhin nur über die Bedienelemente von DokuWiki erreichbar. Wer also eine Seite bearbeitet und speichert, gelangt mit `b` zur zuvor gelesenen Seite, nicht zurück in den Editor. Mehrfaches Drücken führt Schritt für Schritt weiter zurück. Der Verlauf gilt je Browser-Tab (`sessionStorage`, höchstens 50 Seiten).
+
+Die Kürzel sind abgeschaltet, solange in ein Eingabefeld (z. B. die Suche) oder den Editor getippt wird, und greifen nicht zusammen mit Strg, Alt oder Cmd (Strg + `+` zoomt also weiterhin). Der Tooltip jedes Buttons nennt die zugehörige Taste.
 
 ### Norm direkt aufrufen
 

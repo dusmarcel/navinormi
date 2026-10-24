@@ -4,7 +4,10 @@
  *   +    next provision
  *   -    previous provision
  *   i    table of contents
+ *   Backspace, b, r, z  back to the regular wiki page visited before
  *   0-9  open the quick jump dialog ("5 AufenthG" + Enter opens § 5 AufenthG)
+ *
+ * Letters work regardless of case.
  */
 (function () {
     var MAX_RESULTS = 100;
@@ -17,14 +20,81 @@
         return target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
     }
 
+    /* -------------------------------------------------------------- history */
+
+    var HISTORY_KEY = 'navinormi_history';
+    var HISTORY_MAX = 50;
+
+    /** current URL without anchor */
+    var here = window.location.href.split('#')[0];
+
+    /** regular wiki page: no edit, diff, revisions, old revision, search, admin, … */
+    function isRegularWikiPage() {
+        var params = new URLSearchParams(window.location.search);
+        var action = (window.JSINFO && JSINFO.ACT) || params.get('do') || 'show';
+        return action === 'show' && !params.has('rev') && !params.has('at');
+    }
+
+    /** regular pages visited in this tab, most recent last */
+    function readHistory() {
+        try {
+            var pages = JSON.parse(sessionStorage.getItem(HISTORY_KEY));
+            return Array.isArray(pages) ? pages : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function writeHistory(pages) {
+        try {
+            sessionStorage.setItem(HISTORY_KEY, JSON.stringify(pages.slice(-HISTORY_MAX)));
+        } catch (error) {
+            // no storage (private mode): going back stays unavailable
+        }
+    }
+
+    // reloads and pages reached by going back are already on top
+    if (isRegularWikiPage()) {
+        var visited = readHistory();
+        if (visited[visited.length - 1] !== here) {
+            visited.push(here);
+            writeHistory(visited);
+        }
+    }
+
+    /** go to the regular page visited before this one; false if there is none */
+    function goBack() {
+        var pages = readHistory();
+        while (pages.length && pages[pages.length - 1] === here) {
+            pages.pop();
+        }
+        if (!pages.length) {
+            return false;
+        }
+        // the target stays on top, so it is not recorded twice on arrival
+        writeHistory(pages);
+        window.location.href = pages[pages.length - 1];
+        return true;
+    }
+
+    /* ------------------------------------------------------------ shortcuts */
+
     document.addEventListener('keydown', function (event) {
         if (event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey || isTyping(event.target)) {
             return;
         }
 
-        var jumpStart = /^[0-9]$/.test(event.key) ? event.key
-            : event.key === '§' ? '§ '
-            : event.key === 'a' || event.key === 'A' ? 'Art. '
+        var key = event.key.toLowerCase();
+        if (key === 'backspace' || key === 'b' || key === 'r' || key === 'z') {
+            if (goBack()) {
+                event.preventDefault();
+            }
+            return;
+        }
+
+        var jumpStart = /^[0-9]$/.test(key) ? key
+            : key === '§' ? '§ '
+            : key === 'a' ? 'Art. '
             : null;
         if (jumpStart !== null) {
             event.preventDefault();
@@ -33,7 +103,7 @@
         }
 
         var selectors = {'+': 'a.navinormi_next', '-': 'a.navinormi_prev', 'i': 'a.navinormi_toc'};
-        var selector = selectors[event.key];
+        var selector = selectors[key];
         if (!selector) {
             return;
         }
