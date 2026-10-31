@@ -172,6 +172,7 @@
         var jumpStart = /^[0-9]$/.test(key) ? key
             : key === '§' ? '§ '
             : key === 'a' ? 'Art. '
+            : key === 's' ? ''
             : null;
         if (jumpStart !== null) {
             event.preventDefault();
@@ -217,7 +218,11 @@
                         reg.rank = r === current ? -1 : r;
                         reg.text = normalize(reg.syn.join(' '));
                     });
-                    data.entries.forEach(function (entry) {
+                    data.entries.forEach(function (entry, i) {
+                        entry.pos = i;  // TOC order within a regulation
+                        if (entry.t) {
+                            entry.h = lang.toc || '';
+                        }
                         entry.num = parseInt(entry.a, 10);
                         entry.labelText = normalize(entry.l) + data.regs[entry.r].text;
                         entry.headingText = normalize(entry.h);
@@ -265,7 +270,8 @@
 
         var results = [];
         index.entries.forEach(function (entry) {
-            if (kind !== null && entry.l.indexOf(kind) !== 0) {
+            // start pages, recitals and annexes have no number
+            if (!entry.a ? number !== null || kind !== null : kind !== null && entry.l.indexOf(kind) !== 0) {
                 return;
             }
             var numberGroup = 2;
@@ -289,10 +295,13 @@
                 inHeadingOnly = 1;
             }
             var rank = index.regs[entry.r].rank;
-            // exact numbers grouped by regulation; prefix matches by number first ("§ 50 AufenthG, § 50 AsylG, § 51 …")
+            // exact numbers grouped by regulation; prefix matches by number first ("§ 50 AufenthG, § 50 AsylG, § 51 …");
+            // without a number, tables of contents first, then everything in TOC order
             var key = numberGroup === 1
                 ? [numberGroup, inHeadingOnly, entry.num, entry.a, rank]
-                : [numberGroup, inHeadingOnly, rank, entry.num, entry.a];
+                : numberGroup === 0
+                    ? [numberGroup, inHeadingOnly, rank, entry.num, entry.a]
+                    : [numberGroup, inHeadingOnly, entry.t ? 0 : 1, rank, entry.pos];
             results.push({entry: entry, key: key});
         });
 

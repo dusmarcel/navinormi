@@ -24,25 +24,32 @@ Den Ordner nach `lib/plugins/navinormi/` kopieren (der Ordnername muss exakt `na
 
 Die Leiste erscheint **automatisch**, eine Markierung im Wikitext ist nicht nötig. Sie wird auf jeder Seite angezeigt,
 
-1. deren ID dem Schema `art._<Nummer>_<Norm>` folgt (z. B. `art._2_asylgesetz`, `art._12a_anerkennungsverordnung`) und
-2. deren `<Norm>` in normi als Rechtsakt mit Startseite eingetragen ist.
+1. deren ID dem Schema `art._<Nummer>_<Norm>` folgt (z. B. `art._2_asylgesetz`, `art._12a_anerkennungsverordnung`) und deren `<Norm>` in normi als Rechtsakt mit Startseite eingetragen ist, oder
+2. die im Inhaltsverzeichnis eines solchen Rechtsakts als Erwägungsgründe, Anhang oder Anlage verlinkt ist (z. B. `erwägungsgründe_der_aufnahmerichtlinie`, `anlage_a_der_aufenthv`).
 
-Auf allen anderen Seiten (z. B. Startseiten, Anlagen, Erwägungsgründe) erscheint keine Leiste.
+Auf allen anderen Seiten (z. B. den Startseiten selbst) erscheint keine Leiste.
 
 ### Auswertung des Inhaltsverzeichnisses
 
-Vorgänger und Nachfolger werden aus dem Inhaltsverzeichnis auf der Startseite der Norm ermittelt. Berücksichtigt werden Listenpunkte, die mit `§`, `Art.` oder `Artikel`, der Nummer und einer Bezeichnung der Norm (einem normi-Synonym) beginnen:
+Vorgänger und Nachfolger werden aus dem Inhaltsverzeichnis auf der Startseite der Norm ermittelt. Berücksichtigt werden Listenpunkte, die
+
+- mit `§`, `Art.` oder `Artikel`, der Nummer und einer Bezeichnung der Norm (einem normi-Synonym) beginnen oder
+- mit einem Link (`[[…]]`) beginnen, dessen Text mit „Erwägungsgründe“, „Anhang“ oder „Anlage“ anfängt (Groß- und Kleinschreibung egal).
 
 ```
+  * [[Erwägungsgründe der Aufnahmerichtlinie]]
   * § 1 AsylG: Geltungsbereich
   * § 3a AsylG (weggefallen)
   * § 4 StAG [Erwerb der deutschen Staatsangehörigkeit durch Geburt]
   * Art. 1 Anerkennungsverordnung: Gegenstand
+  * [[Anhang I der Aufnahmerichtlinie|ANHANG I der Aufnahmerichtlinie: Frist für die Umsetzung …]]
+  * [[Anlage A der AufenthV]] (zu § 16)
 ```
 
 - Die **Reihenfolge** ergibt sich aus dem Inhaltsverzeichnis, nicht aus der Nummerierung.
 - **Weggefallene Normen** werden mitgeblättert.
-- **Anlagen, Anhänge und Erwägungsgründe** sind auf den Startseiten als explizite Links (`[[…]]`) eingetragen und werden daher ignoriert.
+- **Erwägungsgründe, Anhänge und Anlagen** werden an der Stelle mitgeblättert, an der sie im Inhaltsverzeichnis stehen. Als Beschriftung dient der Linktext bis zum ersten Doppelpunkt bzw. bis zu einer Klammer (z. B. `ANHANG I der Aufnahmerichtlinie`, `Anlage A der AufenthV`).
+- Andere Links (z. B. auf den Volltext bei EUR-Lex oder die Eingangsformel) und das Inhaltsverzeichnis selbst werden nicht mitgeblättert; dorthin führt jederzeit `i`.
 - Auf der **ersten** Norm führt „Zurück“ zur letzten, auf der **letzten** Norm führt „Vorwärts“ zur ersten.
 - Steht die aktuelle Norm nicht im Inhaltsverzeichnis (oder enthält es nur eine Norm), wird nur der Button „Inhaltsverzeichnis“ angezeigt.
 
@@ -60,6 +67,7 @@ Die Beschriftung der Blätter-Buttons nennt das Ziel (z. B. `‹ § 1 AsylG`), d
 | `0`–`9` | Norm direkt aufrufen (siehe unten) |
 | `§` | Norm direkt aufrufen, nur Paragraphen (nationale Gesetze) |
 | `a` | Norm direkt aufrufen, nur Artikel (EU-Recht, AEUV) |
+| `s` | Norm direkt aufrufen, leeres Eingabefenster |
 
 Groß- und Kleinschreibung spielen keine Rolle (`I` = `i`, `A` = `a`, `B` = `b` usw.). `+` und `-` funktionieren auch auf dem Ziffernblock.
 
@@ -71,7 +79,7 @@ Die Kürzel sind abgeschaltet, solange in ein Eingabefeld (z. B. die Suche) oder
 
 ### Norm direkt aufrufen
 
-Wird eine Ziffer, `§` oder `a`/`A` getippt, öffnet sich ein Eingabefenster (bei `§` vorbelegt mit „§ “, bei `a`/`A` mit „Art. “) mit Vorschlägen aus allen Rechtsakten, die normi kennt. Mit jeder weiteren Eingabe wird die Auswahl konkreter; **Enter** öffnet den markierten Vorschlag, **↑/↓** wählen aus, **Esc** schließt das Fenster. Ein Mausklick auf einen Vorschlag öffnet ihn ebenfalls.
+Wird eine Ziffer, `§`, `a`/`A` oder `s`/`S` getippt, öffnet sich ein Eingabefenster (bei `§` vorbelegt mit „§ “, bei `a`/`A` mit „Art. “, bei `s`/`S` leer) mit Vorschlägen aus allen Rechtsakten, die normi kennt. Mit jeder weiteren Eingabe wird die Auswahl konkreter; **Enter** öffnet den markierten Vorschlag, **↑/↓** wählen aus, **Esc** schließt das Fenster. Ein Mausklick auf einen Vorschlag öffnet ihn ebenfalls.
 
 | Eingabe | Vorschläge (Auszug) |
 |---|---|
@@ -82,12 +90,17 @@ Wird eine Ziffer, `§` oder `a`/`A` getippt, öffnet sich ein Eingabefenster (be
 | `Art. 50` | Art. 50 Asylverfahrensverordnung, Art. 50 AMM-VO, Art. 50 Eurodac-Verordnung, … |
 | `5 asylg` | § 5 AsylG, § 50 AsylG, § 51 AsylG, … |
 | `5` ⌫ `ausreise` | Normen mit „Ausreise…“ in der Überschrift, z. B. § 50 AufenthG |
+| `aufenthv` | Inhaltsverzeichnis der Aufenthaltsverordnung, dann § 1 AufenthV, § 2 AufenthV, … |
+| `aufnahmerl` | Inhaltsverzeichnis der Aufnahmerichtlinie (`richtlinie_eu_2024_1346`), dann Erwägungsgründe, Artikel und Anhänge |
+| `erwägungsgründe qvo` | Erwägungsgründe der Anerkennungsverordnung |
+| `anlage d3` | Anlage D3 der AufenthV |
 
 Reihenfolge:
 
 1. Normen mit genau der eingegebenen Nummer, zuerst aus dem Rechtsakt der aktuellen Seite, dann die nationalen Gesetze, dann die EU-Rechtsakte.
 2. Normen, deren Nummer mit der Eingabe beginnt, nach Nummer sortiert (§ 5a, § 50, § 51, …).
 3. Zusätzlicher Text grenzt die Auswahl ein: Er muss am Wortanfang der Normbezeichnung (alle normi-Synonyme, z. B. `qvo`, `amm`) oder der Überschrift aus dem Inhaltsverzeichnis stehen. Treffer in der Normbezeichnung stehen vor Treffern nur in der Überschrift. `§` beschränkt die Auswahl auf Paragraphen, `Art.` bzw. `Artikel` auf Artikel.
+4. Ohne Nummer steht vor den einzelnen Normen das Inhaltsverzeichnis (die Startseite) jedes passenden Rechtsakts, beschriftet mit dem Seitentitel; danach folgen die Treffer in der Reihenfolge des Inhaltsverzeichnisses, einschließlich Erwägungsgründen, Anhängen und Anlagen. Mit Nummer, `§` oder `Art.` werden Inhaltsverzeichnisse, Erwägungsgründe, Anhänge und Anlagen nicht vorgeschlagen.
 
 Der Index aller Normen wird beim ersten Öffnen des Fensters über `lib/exe/ajax.php?call=plugin_navinormi` geladen. Auf dem Server wird er zwischengespeichert, bis sich eine Startseite ändert (neu angelegte Startseiten erscheinen spätestens nach einer Stunde). Normen, deren Startseite der Benutzer nicht lesen darf, sind nicht enthalten.
 

@@ -15,8 +15,8 @@ use dokuwiki\Extension\Plugin;
 class helper_plugin_navinormi extends Plugin
 {
     /**
-     * Navigation data for a norm page, or null if the page is not a norm page
-     * of a regulation known to normi.
+     * Navigation data for a page listed in the table of contents of a regulation known
+     * to normi (a provision, recitals, an annex), or null for any other page.
      *
      * @param string $id page ID, e.g. "art._2_asylgesetz"
      * @return array|null ['toc' => page ID, 'prev' => entry|null, 'next' => entry|null],
@@ -24,27 +24,29 @@ class helper_plugin_navinormi extends Plugin
      */
     public function getNavigation(string $id): ?array
     {
-        if (!preg_match('/^art\._([0-9]+[a-z]?)_(.+)$/', $id, $m)) {
-            return null;
-        }
         // plugin_load() returns null if normi is missing or disabled
         if (plugin_load('syntax', 'normi') === null) {
             return null;
         }
-        $slug = $this->findSlug($m[2]);
+        if (preg_match('/^art\._[0-9]+[a-z]?_(.+)$/', $id, $m)) {
+            $slug = $this->findSlug($m[1]);
+        } else {
+            $slug = $this->cached('extras')[$id] ?? null;
+        }
         if ($slug === null) {
             return null;
         }
 
         $tocId = cleanID(syntax_plugin_normi::START_PAGES[$slug]);
-        $entries = $this->parseToc(rawWiki($tocId), syntax_plugin_normi::REGULATIONS[$slug], $slug);
-        [$prev, $next] = $this->neighbours($entries, $m[1]);
+        $entries = $this->parseToc(rawWiki($tocId), syntax_plugin_normi::REGULATIONS[$slug], $slug, $tocId);
+        [$prev, $next] = $this->neighbours($entries, $id);
 
         return ['toc' => $tocId, 'prev' => $prev, 'next' => $next];
     }
 
     /**
-     * Regulation a page belongs to: a norm page ("art._2_asylgesetz") or a start page ("asylgesetz")
+     * Regulation a page belongs to: a norm page ("art._2_asylgesetz"), a start page
+     * ("asylgesetz") or another page listed on a start page (recitals, annexes)
      *
      * @return string|null regulation slug as used in normi
      */
@@ -61,18 +63,21 @@ class helper_plugin_navinormi extends Plugin
                 return $slug;
             }
         }
-        return null;
+        return $this->cached('extras')[$id] ?? null;
     }
 
     /**
      * Index of all provisions of all regulations, for the quick jump dialog.
      *
-     * Regulations are ordered national laws first (in normi's order), then the others.
-     * The index is cached until a start page (or normi/navinormi) changes; provisions
-     * of regulations the current user may not read are left out.
+     * Regulations are ordered national laws first (in normi's order), then the others;
+     * entries of a regulation in the order of its table of contents. The index is cached
+     * until a start page (or normi/navinormi) changes; entries of regulations the current
+     * user may not read are left out.
      *
      * @return array ['regs' => [['slug', 'syn' => synonyms]], 'entries' => [['r' => reg index,
-     *               'a' => article, 'l' => "§ 5 AufenthG", 'h' => heading, 'u' => URL]]]
+     *               'a' => article, 'l' => "§ 5 AufenthG", 'h' => heading, 'u' => URL]]];
+     *               recitals and annexes have no 'a', the start page of each regulation is
+     *               an entry ['r', 't' => 1, 'l' => page title, 'u']
      */
     public function getIndex(): array
     {
@@ -80,6 +85,21 @@ class helper_plugin_navinormi extends Plugin
             return ['regs' => [], 'entries' => []];
         }
 
+        $index = $this->cached('index');
+        $readable = [];
+        foreach ($index['regs'] as $r => $reg) {
+            $readable[$r] = auth_quickaclcheck($reg['toc']) >= AUTH_READ;
+        }
+        $index['entries'] = array_values(array_filter($index['entries'], fn($e) => $readable[$e['r']]));
+        return $index;
+    }
+
+    /**
+     * Cached result of buildIndex(): 'index' for the quick jump dialog, or 'extras'
+     * (page ID => regulation slug of recitals and annexes, small enough to load on every page)
+     */
+    private function cached(string $name): array
+    {
         $slugs = array_values(array_unique(array_merge(
             array_intersect(syntax_plugin_normi::NATIONAL_LAW_SLUGS, array_keys(syntax_plugin_normi::START_PAGES)),
             array_keys(syntax_plugin_normi::START_PAGES)
@@ -89,26 +109,22 @@ class helper_plugin_navinormi extends Plugin
         foreach ($slugs as $slug) {
             $files[] = wikiFN(cleanID(syntax_plugin_normi::START_PAGES[$slug]));
         }
-        $cache = new \dokuwiki\Cache\Cache('navinormi_index', '.json');
+        $cache = new \dokuwiki\Cache\Cache('navinormi_' . $name, '.json');
         // "age" also picks up start pages created after the cache was built
         if ($cache->useCache(['files' => $files, 'age' => 3600])) {
-            $index = json_decode($cache->retrieveCache(), true);
-        } else {
-            $index = $this->buildIndex($slugs);
-            $cache->storeCache(json_encode($index));
+            return json_decode($cache->retrieveCache(), true);
         }
-
-        $readable = [];
-        foreach ($index['regs'] as $r => $reg) {
-            $readable[$r] = auth_quickaclcheck($reg['toc']) >= AUTH_READ;
+        $built = $this->buildIndex($slugs);
+        foreach ($built as $key => $data) {
+            (new \dokuwiki\Cache\Cache('navinormi_' . $key, '.json'))->storeCache(json_encode($data));
         }
-        $index['entries'] = array_values(array_filter($index['entries'], fn($e) => $readable[$e['r']]));
-        return $index;
+        return $built[$name];
     }
 
     private function buildIndex(array $slugs): array
     {
         $index = ['regs' => [], 'entries' => []];
+        $extras = [];
         foreach ($slugs as $slug) {
             $tocId = cleanID(syntax_plugin_normi::START_PAGES[$slug]);
             if (!page_exists($tocId)) {
@@ -120,17 +136,29 @@ class helper_plugin_navinormi extends Plugin
                 'toc' => $tocId,
                 'syn' => array_values(array_filter(syntax_plugin_normi::REGULATIONS[$slug], fn($s) => $s !== '')),
             ];
-            foreach ($this->parseToc(rawWiki($tocId), syntax_plugin_normi::REGULATIONS[$slug], $slug) as $entry) {
-                $index['entries'][] = [
+            // the start page itself, found by the regulation's name alone
+            $index['entries'][] = [
+                'r' => $r,
+                't' => 1,
+                'l' => p_get_first_heading($tocId) ?: syntax_plugin_normi::REGULATIONS[$slug][0],
+                'u' => wl($tocId),
+            ];
+            foreach ($this->parseToc(rawWiki($tocId), syntax_plugin_normi::REGULATIONS[$slug], $slug, $tocId) as $entry) {
+                $item = [
                     'r' => $r,
-                    'a' => $entry['article'],
                     'l' => $entry['label'],
                     'h' => trim(substr($entry['title'], strlen($entry['label'])), " \t:"),
                     'u' => wl($entry['id']),
                 ];
+                if ($entry['article'] === null) {
+                    $extras[$entry['id']] = $extras[$entry['id']] ?? $slug;
+                } else {
+                    $item = ['a' => $entry['article']] + $item;
+                }
+                $index['entries'][] = $item;
             }
         }
-        return $index;
+        return ['index' => $index, 'extras' => $extras];
     }
 
     /** Labels for script.js, in the language set in the plugin config */
@@ -140,6 +168,7 @@ class helper_plugin_navinormi extends Plugin
         foreach (['jump_aria', 'jump_placeholder', 'jump_loading', 'jump_empty', 'jump_hint'] as $key) {
             $labels[substr($key, 5)] = $this->label($key);
         }
+        $labels['toc'] = $this->label('toc');
         return $labels;
     }
 
@@ -155,48 +184,76 @@ class helper_plugin_navinormi extends Plugin
     }
 
     /**
-     * Extracts the provisions listed on a start page, in TOC order.
+     * Extracts the entries listed on a start page, in TOC order.
      *
-     * Only list items starting with "§ N <synonym>" or "Art. N <synonym>" count;
-     * annexes, recitals etc. are explicit [[links]] and are thereby ignored.
+     * Provisions are list items starting with "§ N <synonym>" or "Art. N <synonym>";
+     * recitals, annexes and appendices are list items starting with a [[link]] whose
+     * text begins with "Erwägungsgründe", "Anhang" or "Anlage" (article null).
      *
-     * @return array list of entries (see getNavigation())
+     * @param string $tocId start page, against which links are resolved
+     * @return array list of entries (see getNavigation()) with 'article'
      */
-    public function parseToc(string $raw, array $synonyms, string $slug): array
+    public function parseToc(string $raw, array $synonyms, string $slug, string $tocId): array
     {
         usort($synonyms, fn($a, $b) => strlen($b) - strlen($a));
         $synonymPattern = implode('|', array_map(fn($s) => preg_quote($s, '/'), $synonyms));
-        $pattern = '/^[ \t]+[*-][ \t]*((?:§|Art\.|Artikel)[ \t]+([0-9]+[a-z]?)[ \t]+(?:' . $synonymPattern . '))'
-            . '(?![\p{L}\p{N}\/-])[^\n]*$/mu';
+        $pattern = '/^[ \t]+[*-][ \t]*(?:'
+            . '(?<label>(?:§|Art\.|Artikel)[ \t]+(?<article>[0-9]+[a-z]?)[ \t]+(?:' . $synonymPattern . '))(?![\p{L}\p{N}\/-])'
+            // "]]" not followed by another "]": link texts may end with "[…]"
+            . '|\[\[(?<target>[^|\]\n]+)(?:\|(?<text>[^\n]*?))?\]\](?!\])'
+            . ')(?<rest>[^\n]*)$/mu';
 
-        preg_match_all($pattern, $raw, $matches, PREG_SET_ORDER);
+        preg_match_all($pattern, $raw, $matches, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
 
         $entries = [];
         foreach ($matches as $match) {
-            $article = strtolower($match[2]);
-            if (isset($entries[$article])) {
-                continue;
+            if ($match['article'] !== null) {
+                $article = strtolower($match['article']);
+                $entry = [
+                    'article' => $article,
+                    'id' => cleanID('art._' . $article . '_' . $slug),
+                    'label' => $match['label'],
+                    'title' => trim($match['label'] . $match['rest']),
+                ];
+            } else {
+                $target = trim($match['target']);
+                $text = trim($match['text'] ?? $target);
+                // no external or interwiki links
+                if (!preg_match('/^(?:Erwägungsgr|Anhang|Anlage)/iu', $text) || preg_match('/:\/\/|>/', $target)) {
+                    continue;
+                }
+                $entry = [
+                    'article' => null,
+                    'id' => $this->resolvePage(explode('#', $target)[0], $tocId),
+                    // "ANHANG I der Aufnahmerichtlinie: Frist …", "Anlage A der AufenthV (zu § 16)"
+                    'label' => trim(preg_split('/:|[ \t][\[(]/u', $text, 2)[0]),
+                    'title' => trim($text . $match['rest']),
+                ];
             }
-            $entries[$article] = [
-                'article' => $article,
-                'id' => cleanID('art._' . $article . '_' . $slug),
-                'label' => $match[1],
-                'title' => trim(preg_replace('/^[ \t]+[*-][ \t]*/', '', $match[0])),
-            ];
+            $entries[$entry['id']] = $entries[$entry['id']] ?? $entry;
         }
         return array_values($entries);
     }
 
+    /** Page ID of a wiki link on the start page $tocId */
+    private function resolvePage(string $target, string $tocId): string
+    {
+        if (class_exists('\dokuwiki\File\PageResolver')) {
+            return (new \dokuwiki\File\PageResolver($tocId))->resolveId($target);
+        }
+        return cleanID($target);
+    }
+
     /**
-     * Previous and next entry of an article; wraps around at both ends.
+     * Previous and next entry of a page; wraps around at both ends.
      *
-     * @return array [prev|null, next|null] — null if the article is not listed
+     * @return array [prev|null, next|null] — null if the page is not listed
      *               or is the only entry
      */
-    public function neighbours(array $entries, string $article): array
+    public function neighbours(array $entries, string $id): array
     {
         $count = count($entries);
-        $index = array_search(strtolower($article), array_column($entries, 'article'), true);
+        $index = array_search($id, array_column($entries, 'id'), true);
         if ($index === false || $count < 2) {
             return [null, null];
         }
