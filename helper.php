@@ -15,8 +15,10 @@ use dokuwiki\Extension\Plugin;
 class helper_plugin_navinormi extends Plugin
 {
     /**
-     * Navigation data for a page listed in the table of contents of a regulation known
-     * to normi (a provision, recitals, an annex), or null for any other page.
+     * Navigation data for the start page of a regulation known to normi or a page listed
+     * in its table of contents (a provision, recitals, an annex), or null for any other page.
+     *
+     * The start page is paged through as well, before the first and after the last entry.
      *
      * @param string $id page ID, e.g. "art._2_asylgesetz"
      * @return array|null ['toc' => page ID, 'prev' => entry|null, 'next' => entry|null],
@@ -28,17 +30,20 @@ class helper_plugin_navinormi extends Plugin
         if (plugin_load('syntax', 'normi') === null) {
             return null;
         }
-        if (preg_match('/^art\._[0-9]+[a-z]?_(.+)$/', $id, $m)) {
-            $slug = $this->findSlug($m[1]);
-        } else {
-            $slug = $this->cached('extras')[$id] ?? null;
-        }
+        $slug = $this->getRegulation($id);
         if ($slug === null) {
             return null;
         }
 
         $tocId = cleanID(syntax_plugin_normi::START_PAGES[$slug]);
         $entries = $this->parseToc(rawWiki($tocId), syntax_plugin_normi::REGULATIONS[$slug], $slug, $tocId);
+        // the start page at position "0"
+        array_unshift($entries, [
+            'article' => null,
+            'id' => $tocId,
+            'label' => $this->label('toc'),
+            'title' => p_get_first_heading($tocId) ?: $this->label('toc'),
+        ]);
         [$prev, $next] = $this->neighbours($entries, $id);
 
         return ['toc' => $tocId, 'prev' => $prev, 'next' => $next];

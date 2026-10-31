@@ -24,10 +24,11 @@ Den Ordner nach `lib/plugins/navinormi/` kopieren (der Ordnername muss exakt `na
 
 Die Leiste erscheint **automatisch**, eine Markierung im Wikitext ist nicht nötig. Sie wird auf jeder Seite angezeigt,
 
-1. deren ID dem Schema `art._<Nummer>_<Norm>` folgt (z. B. `art._2_asylgesetz`, `art._12a_anerkennungsverordnung`) und deren `<Norm>` in normi als Rechtsakt mit Startseite eingetragen ist, oder
-2. die im Inhaltsverzeichnis eines solchen Rechtsakts als Erwägungsgründe, Eingangsformel, Anhang oder Anlage verlinkt ist (z. B. `erwägungsgründe_der_aufnahmerichtlinie`, `anlage_a_der_aufenthv`).
+1. die in normi als Startseite (Inhaltsverzeichnis) eines Rechtsakts eingetragen ist (z. B. `asylgesetz`, `richtlinie_eu_2024_1346`),
+2. deren ID dem Schema `art._<Nummer>_<Norm>` folgt (z. B. `art._2_asylgesetz`, `art._12a_anerkennungsverordnung`) und deren `<Norm>` in normi als Rechtsakt mit Startseite eingetragen ist, oder
+3. die im Inhaltsverzeichnis eines solchen Rechtsakts als Erwägungsgründe, Eingangsformel, Anhang oder Anlage verlinkt ist (z. B. `erwägungsgründe_der_aufnahmerichtlinie`, `anlage_a_der_aufenthv`).
 
-Auf allen anderen Seiten (z. B. den Startseiten selbst) erscheint keine Leiste.
+Auf allen anderen Seiten erscheint keine Leiste.
 
 ### Auswertung des Inhaltsverzeichnisses
 
@@ -49,9 +50,9 @@ Vorgänger und Nachfolger werden aus dem Inhaltsverzeichnis auf der Startseite d
 - Die **Reihenfolge** ergibt sich aus dem Inhaltsverzeichnis, nicht aus der Nummerierung.
 - **Weggefallene Normen** werden mitgeblättert.
 - **Erwägungsgründe, Eingangsformeln, Anhänge und Anlagen** werden an der Stelle mitgeblättert, an der sie im Inhaltsverzeichnis stehen. Als Beschriftung dient der Linktext bis zum ersten Doppelpunkt bzw. bis zu einer Klammer (z. B. `ANHANG I der Aufnahmerichtlinie`, `Anlage A der AufenthV`).
-- Andere Links (z. B. auf den Volltext bei EUR-Lex) und das Inhaltsverzeichnis selbst werden nicht mitgeblättert; dorthin führt jederzeit `i`.
-- Auf der **ersten** Norm führt „Zurück“ zur letzten, auf der **letzten** Norm führt „Vorwärts“ zur ersten.
-- Steht die aktuelle Norm nicht im Inhaltsverzeichnis (oder enthält es nur eine Norm), wird nur der Button „Inhaltsverzeichnis“ angezeigt.
+- Andere Links (z. B. auf den Volltext bei EUR-Lex) werden nicht mitgeblättert.
+- Das **Inhaltsverzeichnis** selbst steht an Stelle „0“: Vom ersten Eintrag führt „Zurück“, vom letzten Eintrag „Vorwärts“ zum Inhaltsverzeichnis; dort führt „Vorwärts“ zum ersten und „Zurück“ zum letzten Eintrag. Der Button heißt dann `‹ Inhaltsverzeichnis` bzw. `Inhaltsverzeichnis ›`, der Tooltip nennt den Seitentitel.
+- Steht die aktuelle Norm nicht im Inhaltsverzeichnis (oder enthält es keine Einträge), wird nur der Button „Inhaltsverzeichnis“ angezeigt.
 
 Die Beschriftung der Blätter-Buttons nennt das Ziel (z. B. `‹ § 1 AsylG`), der Tooltip zusätzlich die vollständige Zeile aus dem Inhaltsverzeichnis.
 
