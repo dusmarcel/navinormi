@@ -188,7 +188,7 @@ class helper_plugin_navinormi extends Plugin
      *
      * Provisions are list items starting with "§ N <synonym>" or "Art. N <synonym>";
      * recitals, annexes and appendices are list items starting with a [[link]] whose
-     * text begins with "Erwägungsgründe", "Anhang" or "Anlage" (article null).
+     * text begins with "Erwägungsgründe", "Anhang", "Anlage" or "Eingangsformel" (article null).
      *
      * @param string $tocId start page, against which links are resolved
      * @return array list of entries (see getNavigation()) with 'article'
@@ -219,7 +219,7 @@ class helper_plugin_navinormi extends Plugin
                 $target = trim($match['target']);
                 $text = trim($match['text'] ?? $target);
                 // no external or interwiki links
-                if (!preg_match('/^(?:Erwägungsgr|Anhang|Anlage)/iu', $text) || preg_match('/:\/\/|>/', $target)) {
+                if (!preg_match('/^(?:Erwägungsgr|Anhang|Anlage|Eingangsformel)/iu', $text) || preg_match('/:\/\/|>/', $target)) {
                     continue;
                 }
                 $entry = [

@@ -25,7 +25,7 @@ Den Ordner nach `lib/plugins/navinormi/` kopieren (der Ordnername muss exakt `na
 Die Leiste erscheint **automatisch**, eine Markierung im Wikitext ist nicht nötig. Sie wird auf jeder Seite angezeigt,
 
 1. deren ID dem Schema `art._<Nummer>_<Norm>` folgt (z. B. `art._2_asylgesetz`, `art._12a_anerkennungsverordnung`) und deren `<Norm>` in normi als Rechtsakt mit Startseite eingetragen ist, oder
-2. die im Inhaltsverzeichnis eines solchen Rechtsakts als Erwägungsgründe, Anhang oder Anlage verlinkt ist (z. B. `erwägungsgründe_der_aufnahmerichtlinie`, `anlage_a_der_aufenthv`).
+2. die im Inhaltsverzeichnis eines solchen Rechtsakts als Erwägungsgründe, Eingangsformel, Anhang oder Anlage verlinkt ist (z. B. `erwägungsgründe_der_aufnahmerichtlinie`, `anlage_a_der_aufenthv`).
 
 Auf allen anderen Seiten (z. B. den Startseiten selbst) erscheint keine Leiste.
 
@@ -34,7 +34,7 @@ Auf allen anderen Seiten (z. B. den Startseiten selbst) erscheint keine Leiste.
 Vorgänger und Nachfolger werden aus dem Inhaltsverzeichnis auf der Startseite der Norm ermittelt. Berücksichtigt werden Listenpunkte, die
 
 - mit `§`, `Art.` oder `Artikel`, der Nummer und einer Bezeichnung der Norm (einem normi-Synonym) beginnen oder
-- mit einem Link (`[[…]]`) beginnen, dessen Text mit „Erwägungsgründe“, „Anhang“ oder „Anlage“ anfängt (Groß- und Kleinschreibung egal).
+- mit einem Link (`[[…]]`) beginnen, dessen Text mit „Erwägungsgründe“, „Eingangsformel“, „Anhang“ oder „Anlage“ anfängt (Groß- und Kleinschreibung egal).
 
 ```
   * [[Erwägungsgründe der Aufnahmerichtlinie]]
@@ -48,8 +48,8 @@ Vorgänger und Nachfolger werden aus dem Inhaltsverzeichnis auf der Startseite d
 
 - Die **Reihenfolge** ergibt sich aus dem Inhaltsverzeichnis, nicht aus der Nummerierung.
 - **Weggefallene Normen** werden mitgeblättert.
-- **Erwägungsgründe, Anhänge und Anlagen** werden an der Stelle mitgeblättert, an der sie im Inhaltsverzeichnis stehen. Als Beschriftung dient der Linktext bis zum ersten Doppelpunkt bzw. bis zu einer Klammer (z. B. `ANHANG I der Aufnahmerichtlinie`, `Anlage A der AufenthV`).
-- Andere Links (z. B. auf den Volltext bei EUR-Lex oder die Eingangsformel) und das Inhaltsverzeichnis selbst werden nicht mitgeblättert; dorthin führt jederzeit `i`.
+- **Erwägungsgründe, Eingangsformeln, Anhänge und Anlagen** werden an der Stelle mitgeblättert, an der sie im Inhaltsverzeichnis stehen. Als Beschriftung dient der Linktext bis zum ersten Doppelpunkt bzw. bis zu einer Klammer (z. B. `ANHANG I der Aufnahmerichtlinie`, `Anlage A der AufenthV`).
+- Andere Links (z. B. auf den Volltext bei EUR-Lex) und das Inhaltsverzeichnis selbst werden nicht mitgeblättert; dorthin führt jederzeit `i`.
 - Auf der **ersten** Norm führt „Zurück“ zur letzten, auf der **letzten** Norm führt „Vorwärts“ zur ersten.
 - Steht die aktuelle Norm nicht im Inhaltsverzeichnis (oder enthält es nur eine Norm), wird nur der Button „Inhaltsverzeichnis“ angezeigt.
 
@@ -100,7 +100,7 @@ Reihenfolge:
 1. Normen mit genau der eingegebenen Nummer, zuerst aus dem Rechtsakt der aktuellen Seite, dann die nationalen Gesetze, dann die EU-Rechtsakte.
 2. Normen, deren Nummer mit der Eingabe beginnt, nach Nummer sortiert (§ 5a, § 50, § 51, …).
 3. Zusätzlicher Text grenzt die Auswahl ein: Er muss am Wortanfang der Normbezeichnung (alle normi-Synonyme, z. B. `qvo`, `amm`) oder der Überschrift aus dem Inhaltsverzeichnis stehen. Treffer in der Normbezeichnung stehen vor Treffern nur in der Überschrift. `§` beschränkt die Auswahl auf Paragraphen, `Art.` bzw. `Artikel` auf Artikel.
-4. Ohne Nummer steht vor den einzelnen Normen das Inhaltsverzeichnis (die Startseite) jedes passenden Rechtsakts, beschriftet mit dem Seitentitel; danach folgen die Treffer in der Reihenfolge des Inhaltsverzeichnisses, einschließlich Erwägungsgründen, Anhängen und Anlagen. Mit Nummer, `§` oder `Art.` werden Inhaltsverzeichnisse, Erwägungsgründe, Anhänge und Anlagen nicht vorgeschlagen.
+4. Ohne Nummer steht vor den einzelnen Normen das Inhaltsverzeichnis (die Startseite) jedes passenden Rechtsakts, beschriftet mit dem Seitentitel; danach folgen die Treffer in der Reihenfolge des Inhaltsverzeichnisses, einschließlich Erwägungsgründen, Eingangsformeln, Anhängen und Anlagen. Mit Nummer, `§` oder `Art.` werden nur einzelne Paragraphen bzw. Artikel vorgeschlagen.
 
 Der Index aller Normen wird beim ersten Öffnen des Fensters über `lib/exe/ajax.php?call=plugin_navinormi` geladen. Auf dem Server wird er zwischengespeichert, bis sich eine Startseite ändert (neu angelegte Startseiten erscheinen spätestens nach einer Stunde). Normen, deren Startseite der Benutzer nicht lesen darf, sind nicht enthalten.
 
