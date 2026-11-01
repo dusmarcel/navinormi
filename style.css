@@ -162,6 +162,10 @@
     cursor: default;
 }
 
+.navinormi_jump li + li.navinormi_jump_fulltext {
+    border-top: 1px solid __border__;
+}
+
 .navinormi_jump_label {
     flex: 0 1 auto;
     min-width: 0;

@@ -170,7 +170,7 @@ class helper_plugin_navinormi extends Plugin
     public function getJsLabels(): array
     {
         $labels = [];
-        foreach (['jump_aria', 'jump_placeholder', 'jump_loading', 'jump_empty', 'jump_hint'] as $key) {
+        foreach (['jump_aria', 'jump_placeholder', 'jump_loading', 'jump_fulltext', 'jump_hint'] as $key) {
             $labels[substr($key, 5)] = $this->label($key);
         }
         $labels['toc'] = $this->label('toc');

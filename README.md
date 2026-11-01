@@ -68,7 +68,7 @@ Die Beschriftung der Blätter-Buttons nennt das Ziel (z. B. `‹ § 1 AsylG`), d
 | `0`–`9` | Norm direkt aufrufen (siehe unten) |
 | `§` | Norm direkt aufrufen, nur Paragraphen (nationale Gesetze) |
 | `a` | Norm direkt aufrufen, nur Artikel (EU-Recht, AEUV) |
-| `s` | Norm direkt aufrufen, leeres Eingabefenster |
+| `s`, `/` | Norm direkt aufrufen, leeres Eingabefenster |
 
 Groß- und Kleinschreibung spielen keine Rolle (`I` = `i`, `A` = `a`, `B` = `b` usw.). `+` und `-` funktionieren auch auf dem Ziffernblock.
 
@@ -80,7 +80,9 @@ Die Kürzel sind abgeschaltet, solange in ein Eingabefeld (z. B. die Suche) oder
 
 ### Norm direkt aufrufen
 
-Wird eine Ziffer, `§`, `a`/`A` oder `s`/`S` getippt, öffnet sich ein Eingabefenster (bei `§` vorbelegt mit „§ “, bei `a`/`A` mit „Art. “, bei `s`/`S` leer) mit Vorschlägen aus allen Rechtsakten, die normi kennt. Mit jeder weiteren Eingabe wird die Auswahl konkreter; **Enter** öffnet den markierten Vorschlag, **↑/↓** wählen aus, **Esc** schließt das Fenster. Ein Mausklick auf einen Vorschlag öffnet ihn ebenfalls.
+Wird eine Ziffer, `§`, `a`/`A`, `s`/`S` oder `/` getippt, öffnet sich ein Eingabefenster (bei `§` vorbelegt mit „§ “, bei `a`/`A` mit „Art. “, bei `s`/`S` und `/` leer) mit Vorschlägen aus allen Rechtsakten, die normi kennt. Mit jeder weiteren Eingabe wird die Auswahl konkreter; **Enter** öffnet den markierten Vorschlag, **↑/↓** wählen aus, **Esc** schließt das Fenster. Ein Mausklick auf einen Vorschlag öffnet ihn ebenfalls.
+
+Die Vorschläge stammen nur aus Nummern, Namen und Überschriften der Normen. Als letzte Option steht deshalb immer **Volltextsuche** zur Verfügung: Sie reicht die Eingabe unverändert an die Suche von DokuWiki weiter. Am schnellsten erreichbar ist sie mit **↑** vom ersten Vorschlag aus; findet sich keine passende Norm, ist sie die einzige Option und mit **Enter** sofort auslösbar.
 
 | Eingabe | Vorschläge (Auszug) |
 |---|---|

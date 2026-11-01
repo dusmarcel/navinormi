@@ -172,7 +172,7 @@
         var jumpStart = /^[0-9]$/.test(key) ? key
             : key === '§' ? '§ '
             : key === 'a' ? 'Art. '
-            : key === 's' ? ''
+            : key === 's' || key === '/' ? ''
             : null;
         if (jumpStart !== null) {
             event.preventDefault();
@@ -405,15 +405,18 @@
             showMessage(lang.placeholder);
             return;
         }
-        var matches = search(query);
-        if (!matches.length) {
-            showMessage(lang.empty);
-            return;
-        }
+        // last option, reached with ↑ from the first: hand the query to DokuWiki's full text search
+        var matches = search(query).concat({
+            l: lang.fulltext,
+            h: query,
+            u: DOKU_BASE + 'doku.php?id=' + encodeURIComponent((window.JSINFO && JSINFO.id) || '')
+                + '&do=search&q=' + encodeURIComponent(query),
+            fulltext: true
+        });
         dialog.matches = matches;
         dialog.list.textContent = '';
         matches.forEach(function (entry, i) {
-            var item = element('li');
+            var item = element('li', entry.fulltext ? 'navinormi_jump_fulltext' : '');
             item.id = 'navinormi_jump_' + i;
             item.setAttribute('role', 'option');
             item.appendChild(element('span', 'navinormi_jump_label', entry.l));
