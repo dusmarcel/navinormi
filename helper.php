@@ -74,7 +74,8 @@ class helper_plugin_navinormi extends Plugin
     /**
      * Index of all provisions of all regulations, for the quick jump dialog.
      *
-     * Regulations are ordered national laws first (in normi's order), then the others;
+     * Regulations are ordered national laws first (in normi's order: those cited with §, then
+     * those cited with Artikel such as the Grundgesetz), then the others;
      * entries of a regulation in the order of its table of contents. The index is cached
      * until a start page (or normi/navinormi) changes; entries of regulations the current
      * user may not read are left out.
@@ -105,8 +106,12 @@ class helper_plugin_navinormi extends Plugin
      */
     private function cached(string $name): array
     {
+        $national = syntax_plugin_normi::NATIONAL_LAW_SLUGS;
+        if (defined('syntax_plugin_normi::NATIONAL_ARTICLE_LAW_SLUGS')) {
+            $national = array_merge($national, syntax_plugin_normi::NATIONAL_ARTICLE_LAW_SLUGS);
+        }
         $slugs = array_values(array_unique(array_merge(
-            array_intersect(syntax_plugin_normi::NATIONAL_LAW_SLUGS, array_keys(syntax_plugin_normi::START_PAGES)),
+            array_intersect($national, array_keys(syntax_plugin_normi::START_PAGES)),
             array_keys(syntax_plugin_normi::START_PAGES)
         )));
 
@@ -193,7 +198,7 @@ class helper_plugin_navinormi extends Plugin
      *
      * Provisions are list items starting with "§ N <synonym>" or "Art. N <synonym>";
      * recitals, annexes and appendices are list items starting with a [[link]] whose
-     * text begins with "Erwägungsgründe", "Anhang", "Anlage" or "Eingangsformel" (article null).
+     * text begins with "Erwägungsgründe", "Präambel", "Eingangsformel", "Anhang" or "Anlage" (article null).
      *
      * @param string $tocId start page, against which links are resolved
      * @return array list of entries (see getNavigation()) with 'article'
@@ -224,7 +229,7 @@ class helper_plugin_navinormi extends Plugin
                 $target = trim($match['target']);
                 $text = trim($match['text'] ?? $target);
                 // no external or interwiki links
-                if (!preg_match('/^(?:Erwägungsgr|Anhang|Anlage|Eingangsformel)/iu', $text) || preg_match('/:\/\/|>/', $target)) {
+                if (!preg_match('/^(?:Erwägungsgr|Präambel|Eingangsformel|Anhang|Anlage)/iu', $text) || preg_match('/:\/\/|>/', $target)) {
                     continue;
                 }
                 $entry = [

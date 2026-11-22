@@ -96,6 +96,42 @@
     }
 }
 
+/* links to other websites, below the bottom navigation bar */
+
+.dokuwiki aside.plugin_navinormi_external {
+    clear: both;
+    margin: 0 0 1em;
+    padding: .6em 1em;
+    border: 1px solid __border__;
+    border-radius: 6px;
+    background-color: __background_alt__;
+}
+
+.dokuwiki aside.plugin_navinormi_external .navinormi_external_heading {
+    margin: 0 0 .3em;
+    font-weight: bold;
+}
+
+.dokuwiki aside.plugin_navinormi_external ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dokuwiki aside.plugin_navinormi_external ul + ul {
+    margin-top: .3em;
+}
+
+.dokuwiki aside.plugin_navinormi_external li {
+    display: inline;
+    margin: 0;
+}
+
+.dokuwiki aside.plugin_navinormi_external li + li::before {
+    content: " · ";
+    color: __text_neu__;
+}
+
 /* quick jump dialog (appended to <body>, outside .dokuwiki) */
 
 .navinormi_jump_backdrop {

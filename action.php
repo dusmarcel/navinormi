@@ -26,6 +26,16 @@ class action_plugin_navinormi extends ActionPlugin
         $controller->register_hook('TPL_ACT_RENDER', 'AFTER', $this, 'handleRender', 'bottom');
         $controller->register_hook('DOKUWIKI_STARTED', 'AFTER', $this, 'handleJsinfo');
         $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handleAjax');
+        $controller->register_hook('INDEXER_TASKS_RUN', 'BEFORE', $this, 'handleIndexerTask');
+    }
+
+    /** Builds the index of the other websites in the background: one request per run, like DokuWiki's own tasks */
+    public function handleIndexerTask(Event $event)
+    {
+        if (plugin_load('helper', 'navinormi_external')->refreshNext()) {
+            $event->preventDefault();
+            $event->stopPropagation();
+        }
     }
 
     /** Current regulation and labels for the quick jump dialog in script.js */
@@ -65,5 +75,14 @@ class action_plugin_navinormi extends ActionPlugin
             return;
         }
         echo plugin_load('helper', 'navinormi')->renderNavigation($this->nav, $position);
+
+        if ($position === 'bottom') {
+            global $ID;
+            $external = plugin_load('helper', 'navinormi_external');
+            $links = $external->getLinks((string) $ID);
+            if ($links !== null) {
+                echo $external->render($links);
+            }
+        }
     }
 }
